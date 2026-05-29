@@ -6,8 +6,10 @@ services:
     ports:
       - "8000:8000"
     environment:
+      # 🔄 THE DOCKER NETWORKING FIX: 
       - OLLAMA_HOST=http://docker.internal
     extra_hosts:
+      # 🔌 This enables the bridge gateway between the container and your PC
       - "host.docker.internal:host-gateway"
 
   frontend:
