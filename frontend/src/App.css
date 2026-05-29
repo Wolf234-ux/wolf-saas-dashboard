@@ -1,0 +1,331 @@
+/* 1. Global Reset & Layout Foundation */
+body, html {
+  background-color: #0d0f17;
+  color: #e2e8f0;
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+}
+
+.fullscreen-app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100vw;
+  box-sizing: border-box;
+}
+
+/* 2. Top Navigation Header */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #070913;
+  padding: 16px 24px;
+  border-bottom: 1px solid #1e293b;
+}
+
+.logo-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.logo-group h1 {
+  font-size: 18px;
+  margin: 0;
+  color: #f8fafc;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.hunt-tagline {
+  font-size: 12px;
+  color: #10b981;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+/* Engine Active Indicator */
+.status-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(16, 185, 129, 0.08);
+  padding: 6px 14px;
+  border-radius: 9999px;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.pulse-indicator {
+  width: 8px;
+  height: 8px;
+  background-color: #10b981;
+  border-radius: 50%;
+  box-shadow: 0 0 8px #10b981;
+}
+
+.status-text {
+  font-size: 11px;
+  font-weight: 700;
+  color: #10b981;
+  letter-spacing: 0.5px;
+}
+
+/* 3. Dashboard Container Layout */
+.dashboard-content {
+  display: flex;
+  flex: 1;
+  height: calc(100vh - 65px);
+  width: 100%;
+}
+
+/* 4. Left Sidebar Panel */
+.control-sidebar {
+  width: 280px;
+  background: #070913;
+  border-right: 1px solid #1e293b;
+  padding: 24px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.sidebar-section h3 {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #64748b;
+  margin-top: 0;
+  margin-bottom: 12px;
+  font-weight: 700;
+}
+
+.persona-radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.persona-btn {
+  text-align: left;
+  padding: 12px 16px;
+  background: #0f172a;
+  color: #94a3b8;
+  border: 1px solid #1e293b;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.persona-btn:hover {
+  background: #1e293b;
+  color: #f8fafc;
+}
+
+.persona-btn.active {
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+  border-color: #3b82f6;
+}
+
+/* History Module Rules */
+.history-section {
+  border-top: 1px solid #1e293b;
+  padding-top: 20px;
+}
+
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.history-item {
+  padding: 10px 14px;
+  background: #0f172a;
+  border: 1px solid #1e293b;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #94a3b8;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: all 0.2s ease;
+}
+
+.history-item:hover {
+  border-color: #3b82f6;
+  color: #f8fafc;
+  background: rgba(59, 130, 246, 0.05);
+}
+
+/* 5. Main Right Chat Workspace */
+.workspace-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: #0b0f19;
+  padding: 24px;
+  box-sizing: border-box;
+}
+
+.chat-box {
+  flex: 1;
+  background: #070913;
+  border: 1px solid #1e293b;
+  border-radius: 12px;
+  padding: 24px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Chat Rows & Alignments */
+.msg-wrapper {
+  display: flex;
+  width: 100%;
+}
+
+.user-align { justify-content: flex-end; }
+.ai-align { justify-content: flex-start; }
+
+.msg-bubble {
+  max-width: 75%;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.bubble-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.user-align .bubble-label { text-align: right; color: #3b82f6; }
+.ai-align .bubble-label { color: #10b981; }
+
+.bubble-body {
+  padding: 12px 18px;
+  border-radius: 12px;
+  font-size: 14px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+/* Bubble Theme Formats */
+.user-style .bubble-body {
+  background: #2563eb;
+  color: #ffffff;
+  border-top-right-radius: 2px;
+}
+
+.ai-style .bubble-body {
+  background: #0f172a;
+  color: #f1f5f9;
+  border: 1px solid #1e293b;
+  border-top-left-radius: 2px;
+  font-family: Menlo, Monaco, Consolas, monospace;
+}
+
+/* 6. Form Inputs & Actions Bar */
+.input-form {
+  display: flex;
+  margin-top: 20px;
+  gap: 12px;
+  width: 100%;
+}
+
+.input-form input {
+  flex: 1;
+  padding: 14px 18px;
+  background-color: #070913;
+  color: #ffffff;
+  border: 1px solid #1e293b;
+  border-radius: 10px;
+  font-size: 14px;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.input-form input:focus {
+  border-color: #3b82f6;
+}
+
+/* Action Control Buttons */
+.hunt-btn, .terminate-btn {
+  padding: 0 28px;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.hunt-btn {
+  background: #10b981;
+  color: #ffffff;
+}
+
+.hunt-btn:hover {
+  background: #059669;
+}
+
+.terminate-btn {
+  background: #ef4444;
+  color: #ffffff;
+}
+
+.terminate-btn:hover {
+  background: #dc2626;
+}
+
+.input-form input:disabled, button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Responsive adjustments for mobile viewports */
+@media (max-width: 768px) {
+  .dashboard-content {
+    flex-direction: column; /* Stacks sidebar on top of chat */
+    overflow-y: auto;
+  }
+  
+  .control-sidebar {
+    width: 100%; /* Sidebar takes full width */
+    height: auto;
+    padding: 15px;
+    gap: 15px;
+  }
+  
+  .workspace-main {
+    padding: 10px;
+    height: 500px; /* Constrains height on small screens */
+  }
+  
+  .chat-box {
+    padding: 15px;
+  }
+
+  .msg-bubble {
+    max-width: 90%; /* Gives text bubbles more room */
+  }
+  
+  .navbar {
+    padding: 10px 15px;
+  }
+}
