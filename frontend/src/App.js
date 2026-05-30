@@ -8,6 +8,13 @@ function App() {
   const [inputText, setInputText] = useState('');
   const [loading, setLoading] = useState(false);
   const [persona, setPersona] = useState('programmer');
+
+  const [token, setToken] = useState(
+    localStorage.getItem('token')
+  );
+
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   
   // Track previous chat logs in the sidebar
   const [chatHistory, setChatHistory] = useState([
@@ -51,7 +58,10 @@ function App() {
 
       const response = await fetch(`http://${hostIP}:8000/api/chat`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify({
           messages: conversationHistory,
           persona: persona
@@ -110,6 +120,117 @@ function App() {
     }
   };
 
+  const handleLogin = async () => {
+    try {
+      const hostIP = window.location.hostname;
+
+      const response = await fetch(
+        `http://${hostIP}:8000/login`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            username,
+            password
+          })
+        }
+      );
+
+      const data = await response.json();
+
+      if (data.access_token) {
+        localStorage.setItem(
+          "token",
+          data.access_token
+        );
+
+        setToken(data.access_token);
+      } else {
+        alert("Invalid Credentials");
+      }
+
+    } catch (error) {
+      console.error(error);
+      alert("Login Failed");
+    }
+  };
+
+  if (!token) {
+    return (
+      <div
+        style={{
+          height: "100vh",
+          background: "#020617",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center"
+        }}
+      >
+        <div
+          style={{
+            width: "400px",
+            padding: "30px",
+            background: "#0f172a",
+            borderRadius: "12px"
+          }}
+        >
+          <h2
+            style={{
+              color: "#fff",
+              marginBottom: "20px"
+            }}
+          >
+            Wolf AI Login
+          </h2>
+
+          <input
+            type="text"
+            placeholder="Username"
+            value={username}
+            onChange={(e) =>
+              setUsername(e.target.value)
+            }
+            style={{
+              width: "100%",
+              padding: "12px",
+              marginBottom: "12px"
+            }}
+          />
+
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) =>
+              setPassword(e.target.value)
+            }
+            style={{
+              width: "100%",
+              padding: "12px",
+              marginBottom: "20px"
+            }}
+          />
+
+          <button
+            onClick={handleLogin}
+            style={{
+              width: "100%",
+              padding: "12px",
+              background: "#10b981",
+              color: "white",
+              border: "none",
+              cursor: "pointer"
+            }}
+          >
+            Login
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="fullscreen-app">
       <header className="navbar">
@@ -118,6 +239,23 @@ function App() {
           <span className="hunt-tagline">Hey Wolf, ready to hunt? 🐺</span>
         </div>
         <div className="status-container">
+          <button
+            onClick={() => {
+              localStorage.removeItem("token");
+              setToken(null);
+            }}
+            style={{
+              marginRight: "20px",
+              background: "#dc2626",
+              color: "#fff",
+              border: "none",
+              padding: "8px 12px",
+              borderRadius: "6px",
+              cursor: "pointer"
+            }}
+          >
+            Logout
+          </button>
           <span className="pulse-indicator"></span>
           <span className="status-text">ENGINE ACTIVE (QWEN-1.5B)</span>
         </div>

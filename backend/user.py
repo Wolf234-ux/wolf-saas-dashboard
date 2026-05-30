@@ -1,0 +1,6 @@
+USERS = {
+    "admin": {
+        "password": "admin123",
+        "role": "admin"
+    }
+}

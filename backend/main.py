@@ -3,10 +3,24 @@ import json
 import requests
 
 from typing import List
-from fastapi import FastAPI, HTTPException
+
+from fastapi import (
+    FastAPI,
+    HTTPException,
+    Header
+)
+
 from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+from jose import jwt
+from jose.exceptions import JWTError
+from auth import create_access_token
+from user import USERS
+from fastapi import Depends
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+
+security = HTTPBearer()
 
 # ==========================================================
 # APP
@@ -35,6 +49,13 @@ OLLAMA_CHAT_URL = f"{OLLAMA_HOST}/api/chat"
 OLLAMA_TAGS_URL = f"{OLLAMA_HOST}/api/tags"
 
 # ==========================================================
+# JWT CONFIG
+# ==========================================================
+
+SECRET_KEY = "wolf_ai_secret_2026"
+ALGORITHM = "HS256"
+
+# ==========================================================
 # PERSONAS
 # ==========================================================
 
@@ -60,31 +81,99 @@ PERSONAS = {
 # REQUEST MODELS
 # ==========================================================
 
+class LoginRequest(BaseModel):
+    username: str
+    password: str
+
+
 class MessageModel(BaseModel):
     role: str
     content: str
+
 
 class ChatSettingsRequest(BaseModel):
     messages: List[MessageModel]
     persona: str
 
+
+# ==========================================================
+# JWT VERIFY
+# ==========================================================
+
+def verify_token(token: str):
+
+    try:
+
+        payload = jwt.decode(
+            token,
+            SECRET_KEY,
+            algorithms=[ALGORITHM]
+        )
+
+        return payload
+
+    except JWTError:
+        return None
+
+
 # ==========================================================
 # ROOT
 # ==========================================================
+
 print("WOLF MAIN.PY LOADED")
 
 
-@app.get("/wolf")
-def wolf():
-    return {"status": "wolf works"}
-
 @app.get("/")
 def root():
+
     return {
         "status": "running",
         "product": "Wolf AI SaaS Core",
         "ollama_host": OLLAMA_HOST
     }
+
+
+@app.get("/wolf")
+def wolf():
+
+    return {
+        "status": "wolf works"
+    }
+
+
+# ==========================================================
+# LOGIN
+# ==========================================================
+
+@app.post("/login")
+def login(data: LoginRequest):
+
+    user = USERS.get(data.username)
+
+    if not user:
+
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid credentials"
+        )
+
+    if user["password"] != data.password:
+
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid credentials"
+        )
+
+    token = create_access_token(
+        {
+            "sub": data.username
+        }
+    )
+
+    return {
+        "access_token": token
+    }
+
 
 # ==========================================================
 # HEALTH CHECK
@@ -92,7 +181,9 @@ def root():
 
 @app.get("/health")
 def health_check():
+
     try:
+
         response = requests.get(
             OLLAMA_TAGS_URL,
             timeout=10
@@ -107,11 +198,13 @@ def health_check():
         }
 
     except Exception as e:
+
         return {
             "status": "unhealthy",
             "ollama": "disconnected",
             "error": str(e)
         }
+
 
 # ==========================================================
 # MODEL LIST
@@ -119,7 +212,9 @@ def health_check():
 
 @app.get("/models")
 def list_models():
+
     try:
+
         response = requests.get(
             OLLAMA_TAGS_URL,
             timeout=10
@@ -130,17 +225,43 @@ def list_models():
         return response.json()
 
     except Exception as e:
+
         raise HTTPException(
             status_code=500,
             detail=f"Ollama Error: {str(e)}"
         )
 
+
 # ==========================================================
-# CHAT STREAM
+# PROTECTED CHAT
 # ==========================================================
 
 @app.post("/api/chat")
-async def stream_chat(request: ChatSettingsRequest):
+async def stream_chat(
+    request: ChatSettingsRequest,
+    credentials: HTTPAuthorizationCredentials = Depends(security)
+):
+
+    print("================================")
+    print("AUTH HEADER:", credentials.credentials)
+    print("================================")
+
+    token = credentials.credentials
+    print("Received Token:", token)
+    user = verify_token(token)
+
+    if not user:
+
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid token"
+        )
+
+    username = user.get("sub")
+
+    print(
+        f"Authenticated User: {username}"
+    )
 
     system_prompt = PERSONAS.get(
         request.persona,
@@ -155,6 +276,7 @@ async def stream_chat(request: ChatSettingsRequest):
     ]
 
     for msg in request.messages:
+
         ollama_messages.append(
             {
                 "role": msg.role,
@@ -187,6 +309,7 @@ async def stream_chat(request: ChatSettingsRequest):
                         continue
 
                     try:
+
                         chunk = json.loads(
                             line.decode("utf-8")
                         )
@@ -207,7 +330,10 @@ async def stream_chat(request: ChatSettingsRequest):
 
         except Exception as e:
 
-            print("OLLAMA ERROR:", e)
+            print(
+                "OLLAMA ERROR:",
+                e
+            )
 
             yield (
                 f"\n\n⚠️ Ollama Connection Error:\n"
