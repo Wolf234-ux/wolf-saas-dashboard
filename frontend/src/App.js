@@ -9,6 +9,9 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [persona, setPersona] = useState('programmer');
   
+  const [isAuthenticated, setIsAuthenticated] = useState(
+  !!localStorage.getItem("token")
+);
   // Track previous chat logs in the sidebar
   const [chatHistory, setChatHistory] = useState([
     { id: 1, title: 'Python Loop Function' },
@@ -21,6 +24,12 @@ function App() {
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    setIsAuthenticated(false);
+    window.location.reload();
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -51,7 +60,10 @@ function App() {
 
       const response = await fetch(`http://${hostIP}:8000/api/chat`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem("token")}`
+        },
         body: JSON.stringify({
           messages: conversationHistory,
           persona: persona
@@ -117,9 +129,35 @@ function App() {
           <h1>AI SaaS Core v2.5</h1>
           <span className="hunt-tagline">Hey Wolf, ready to hunt? 🐺</span>
         </div>
-        <div className="status-container">
-          <span className="pulse-indicator"></span>
-          <span className="status-text">ENGINE ACTIVE (QWEN-1.5B)</span>
+
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "15px"
+          }}
+        >
+          <button
+            onClick={handleLogout}
+            style={{
+              background: "#ef4444",
+              color: "white",
+              border: "none",
+              padding: "10px 18px",
+              borderRadius: "8px",
+              cursor: "pointer",
+              fontWeight: "600"
+            }}
+          >
+            Logout
+          </button>
+
+          <div className="status-container">
+            <span className="pulse-indicator"></span>
+            <span className="status-text">
+              ENGINE ACTIVE (QWEN-1.5B)
+            </span>
+          </div>
         </div>
       </header>
 
