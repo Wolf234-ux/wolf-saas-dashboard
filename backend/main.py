@@ -72,9 +72,16 @@ class ChatSettingsRequest(BaseModel):
     persona: str
 
 # ==========================================================
+# AUTH MODELS
+# ==========================================================
+
+class LoginRequest(BaseModel):
+    username: str
+    password: str
+
+# ==========================================================
 # ROOT
 # ==========================================================
-print("WOLF MAIN.PY LOADED")
 
 
 @app.get("/wolf")
@@ -139,11 +146,41 @@ def list_models():
         )
 
 # ==========================================================
+# LOGIN
+# ==========================================================
+
+@app.post("/login")
+async def login(user: LoginRequest):
+
+    if user.username == "admin" and user.password == "admin123":
+
+        return {
+            "access_token": "wolf-admin-token",
+            "token_type": "bearer"
+        }
+
+    raise HTTPException(
+        status_code=401,
+        detail="Invalid username or password"
+    )
+
+# ==========================================================
 # CHAT STREAM
 # ==========================================================
 
 @app.post("/api/chat")
-async def stream_chat(request: ChatSettingsRequest):
+async def stream_chat(
+    request: ChatSettingsRequest,
+    credentials: HTTPAuthorizationCredentials = Depends(security)
+):
+
+    token = credentials.credentials
+
+    if token != "wolf-admin-token":
+        raise HTTPException(
+            status_code=401,
+            detail="Unauthorized"
+        )
 
     system_prompt = PERSONAS.get(
         request.persona,
