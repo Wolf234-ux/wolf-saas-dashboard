@@ -9,6 +9,8 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [persona, setPersona] = useState('programmer');
   
+  const [token, setToken] = useState(localStorage.getItem("token"));
+  
   const [isAuthenticated, setIsAuthenticated] = useState(
   !!localStorage.getItem("token")
 );
@@ -25,9 +27,24 @@ function App() {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    const tokenValue = localStorage.getItem("token");
+
+    try {
+      await fetch("http://localhost:8000/logout", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${tokenValue}`,
+        },
+      });
+    } catch (error) {
+      console.error(error);
+    }
+
     localStorage.removeItem("token");
+    setToken(null);
     setIsAuthenticated(false);
+
     window.location.reload();
   };
 

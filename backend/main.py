@@ -3,9 +3,10 @@ import json
 import requests
 
 from typing import List
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends
 from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel
 
 # ==========================================================
@@ -21,6 +22,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+security = HTTPBearer()
 
 # ==========================================================
 # ENVIRONMENT
@@ -218,3 +221,20 @@ async def stream_chat(request: ChatSettingsRequest):
         event_stream(),
         media_type="text/plain"
     )
+
+# ==========================================================
+# LOGOUT
+# ==========================================================
+
+@app.post("/logout")
+async def logout(
+    credentials: HTTPAuthorizationCredentials = Depends(security)
+):
+    token = credentials.credentials
+
+    print("LOGOUT TOKEN:", token)
+
+    return {
+        "status": "success",
+        "message": "Logged out successfully"
+    }
